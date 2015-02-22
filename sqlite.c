@@ -2,6 +2,7 @@
 #include <sqlite3.h>
 
 static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
+    MODES_NOTUSED(NotUsed);
     int i;
     for(i=0; i<argc; i++) {
         printf("%s = %s\n", azColName[i], argv[i] ? argv[i] : "NULL");
