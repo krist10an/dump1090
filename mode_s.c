@@ -1930,7 +1930,7 @@ void useModesMessage(struct modesMessage *mm) {
     if ((Modes.check_crc == 0) || (mm->crcok) || (mm->correctedbits)) { // not checking, ok or fixed
 
         // Always track aircraft
-        interactiveReceiveData(mm);
+        struct aircraft *a = interactiveReceiveData(mm);
 
         // In non-interactive non-quiet mode, display messages on standard output
         if (!Modes.interactive && !Modes.quiet) {
@@ -1939,6 +1939,7 @@ void useModesMessage(struct modesMessage *mm) {
 
         // Feed output clients
         if (Modes.net) {modesQueueOutput(mm);}
+        if (Modes.sql) {modesFeedSQL(mm, a);}
 
         // Heartbeat not required whilst we're seeing real messages
         Modes.net_heartbeat_count = 0;

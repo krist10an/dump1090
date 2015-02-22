@@ -436,6 +436,7 @@ void showHelp(void) {
 "--debug <flags>          Debug mode (verbose), see README for details\n"
 "--quiet                  Disable output to stdout. Use for daemon applications\n"
 "--ppm <error>            Set receiver error in parts per million (default 0)\n"
+"--sql                    Enable SQL data logging\n"
 "--help                   Show this help\n"
 "\n"
 "Debug mode flags: d = Log frames decoded with errors\n"
@@ -778,6 +779,8 @@ int main(int argc, char **argv) {
         } else if (!strcmp(argv[j],"--interactive-rtl1090")) {
             Modes.interactive = 1;
             Modes.interactive_rtl1090 = 1;
+        } else if (!strcmp(argv[j],"--sql")) {
+            Modes.sql = 1;
         } else {
             fprintf(stderr,
                 "Unknown or not enough arguments for option '%s'.\n\n",
