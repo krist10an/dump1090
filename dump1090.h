@@ -464,6 +464,8 @@ void modesReadFromClient(struct client *c, char *sep, int(*handler)(struct clien
 // Functions exported from mysql.c
 //
 void modesFeedSQL(struct modesMessage *mm, struct aircraft *a);
+void connectSQL();
+void disconnectSQL();
 
 #ifdef __cplusplus
 }

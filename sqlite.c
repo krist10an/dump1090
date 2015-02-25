@@ -11,16 +11,51 @@ static int callback(void *NotUsed, int argc, char **argv, char **azColName) {
     return 0;
 }
 
-void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
-// code here
-    sqlite3 *db;
-    char *zErrMsg = 0;
+sqlite3 *db;
+int sql_connected = 0;
+
+void connectSQL() {
     int rc;
-    char *sql;
+    fprintf(stderr, "ConnectSQL ");
     rc = sqlite3_open("basestation.sqb", &db);
     if( rc ) {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-       exit(0);
+        sql_connected = 0;
+    } else {
+        sql_connected = 1;
+        fprintf(stderr, "=OK\n");
+#ifdef USE_SPATIALITE
+        sqlite3_enable_load_extension (db, 1);
+
+        int rc;
+        char *sql;
+        char *zErrMsg = 0;
+
+        sql = sqlite3_mprintf("SELECT load_extension('libspatialite.so')");
+        rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        if( rc != SQLITE_OK )  {
+            fprintf(stderr, "Unable to load extension: %s\n", zErrMsg);
+            sqlite3_free(zErrMsg);
+            sql_connected = 0;
+        }
+#endif
+    }
+}
+
+void disconnectSQL() {
+    fprintf(stderr, "DisconnectSQL\n");
+    if (sql_connected) {
+        sqlite3_close(db);
+    }
+}
+
+void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
+// code here
+    char *zErrMsg = 0;
+    int rc;
+    char *sql;
+    if ( !sql_connected ) {
+        exit(0);
     } else {
 
 //char msgFlights[1000], *p = msgFlights;
@@ -38,7 +73,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
              sqlite3_free(zErrMsg);
         } else {
-            fprintf(stdout, "DF 0 == OK\n");
+            //fprintf(stdout, "DF 0 == OK\n");
         }
     }
 
@@ -66,7 +101,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
         } else {
-            fprintf(stdout, "DF %d== OK\n",mm->msgtype);
+            //fprintf(stdout, "DF %d== OK\n",mm->msgtype);
         }
     }
 
@@ -95,12 +130,28 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
         } else {
-            fprintf(stdout, "DF 17 == OK\n");
+            //fprintf(stdout, "DF 17 == OK\n");
         }
 
+
+#ifdef USE_SPATIALITE
+#define COLUMNSTR ", Geometry"
+#define VALUESTR ", MakePoint(%f,%f, 4326)"
+#else
+#define COLUMNSTR ""
+#define VALUESTR ""
+#endif
+
         if (mm->bFlags & MODES_ACFLAGS_LATLON_VALID) {
-            sql = sqlite3_mprintf( "INSERT INTO trackslog (modes, alt, vr, lat, lon, speed, heading, last_update) VALUES ('%06X', '%d', '%d', '%1.5f', '%1.5f', '%d', '%d', CURRENT_TIMESTAMP)",
-                 a->addr, a->altitude, a->vert_rate, a->lat, a->lon, a->speed, a->track);
+            sql = sqlite3_mprintf( "INSERT INTO trackslog (modes, alt, vr, lat, lon, speed, heading, last_update"
+            COLUMNSTR
+            ") VALUES ('%06X', '%d', '%d', '%1.5f', '%1.5f', '%d', '%d', CURRENT_TIMESTAMP "
+            VALUESTR
+            ");", a->addr, a->altitude, a->vert_rate, a->lat, a->lon, a->speed, a->track
+#ifdef USE_SPATIALITE
+            , a->lat, a->lon
+#endif
+          );
 
             rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
             if( rc != SQLITE_OK ) {
@@ -113,5 +164,4 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
     }
     }
 /////////////////////////
-    sqlite3_close(db);
 }
