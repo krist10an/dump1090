@@ -225,6 +225,8 @@ struct aircraft {
     double        lat, lon;       // Coordinated obtained from CPR encoded data
     int           bFlags;         // Flags related to valid fields in this structure
     struct aircraft *next;        // Next aircraft in our linked list
+
+    uint32_t      flightId;       // Linking aircraft messages together
 };
 
 struct stDF {
@@ -464,6 +466,7 @@ void modesReadFromClient(struct client *c, char *sep, int(*handler)(struct clien
 // Functions exported from mysql.c
 //
 void modesFeedSQL(struct modesMessage *mm, struct aircraft *a);
+void modesRemoveStaleSQL(struct aircraft *a);
 void connectSQL();
 void disconnectSQL();
 

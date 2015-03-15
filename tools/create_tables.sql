@@ -26,6 +26,7 @@ CREATE TABLE trackslog (
     lon         DECIMAL( 17, 14 ),
     heading     INT( 6 ),
     speed       INT( 6 ),
+    flightid    INT( 8 ),
     last_update TIMESTAMP          DEFAULT ( CURRENT_TIMESTAMP ) 
 );
 

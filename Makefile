@@ -12,7 +12,6 @@ endif
 
 CFLAGS=-O2 -g -Wall -W `pkg-config --cflags librtlsdr`
 LIBS=`pkg-config --libs librtlsdr` -lpthread -lm -lsqlite3
-LIBS+=-DUSE_SPATIALITE
 CC=gcc
 
 

@@ -885,6 +885,7 @@ int main(int argc, char **argv) {
         backgroundTasks();
         pthread_mutex_lock(&Modes.data_mutex);
     }
+    if (Modes.sql) { disconnectSQL(); }
 
     // If --stats were given, print statistics
     if (Modes.stats) {
@@ -898,7 +899,7 @@ int main(int argc, char **argv) {
     pthread_cond_destroy(&Modes.data_cond);     // Thread cleanup
     pthread_mutex_destroy(&Modes.data_mutex);
     pthread_join(Modes.reader_thread,NULL);     // Wait on reader thread exit
-    if (Modes.sql) { disconnectSQL(); }
+
 #ifndef _WIN32
     pthread_exit(0);
 #else
