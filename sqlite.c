@@ -31,7 +31,7 @@ void connectSQL() {
         fprintf(stdout, "=OK\n");
 
         // Create session
-        sql = sqlite3_mprintf("INSERT INTO Sessions (LocationID, StartTime) VALUES (1, CURRENT_TIMESTAMP)");
+        sql = sqlite3_mprintf("INSERT INTO session (locationid, starttime) VALUES (1, CURRENT_TIMESTAMP)");
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "Unable to add session: %s\n", zErrMsg);
@@ -64,7 +64,7 @@ void disconnectSQL() {
         fprintf(stdout, "Stopping session id %d\n", sql_session_id);
 
         // Stop session
-        sql = sqlite3_mprintf("UPDATE Sessions SET Endtime=CURRENT_TIMESTAMP WHERE SessionID='%d'", sql_session_id);
+        sql = sqlite3_mprintf("UPDATE session SET endtime=CURRENT_TIMESTAMP WHERE sessionid='%d'", sql_session_id);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "Error closing session: %s\n", zErrMsg);
@@ -92,8 +92,8 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
         struct tm *seentm = gmtime(&a->seen);
         a->flightId = seentm->tm_hour*10000 + seentm->tm_min*100 + seentm->tm_sec;
 #else
-        sql = sqlite3_mprintf( "INSERT INTO flights (sessionid, aircraftid, starttime) VALUES ('%d', '%d', '%" PRIu64 "');",
-                sql_session_id, 1, a->timestamp);
+        sql = sqlite3_mprintf( "INSERT INTO flight (sessionid, modes, starttime) VALUES ('%d', '%06X', CURRENT_TIMESTAMP);",
+                sql_session_id, a->addr);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
@@ -183,9 +183,9 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
         }
 
         if (mm->bFlags & MODES_ACFLAGS_LATLON_VALID) {
-            sql = sqlite3_mprintf( "INSERT INTO trackslog (modes, alt, vr, lat, lon, speed, heading, flightId, last_update"
-            ") VALUES ('%06X', '%d', '%d', '%1.5f', '%1.5f', '%d', '%d', '%lu', CURRENT_TIMESTAMP "
-            ");", a->addr, a->altitude, a->vert_rate, a->lat, a->lon, a->speed, a->track, a->flightId
+            sql = sqlite3_mprintf( "INSERT INTO trackslog (modes, alt, vr, lat, lon, speed, heading, flightId, signallevel, last_update"
+            ") VALUES ('%06X', '%d', '%d', '%1.5f', '%1.5f', '%d', '%d', '%lu', '%u', CURRENT_TIMESTAMP "
+            ");", a->addr, a->altitude, a->vert_rate, a->lat, a->lon, a->speed, a->track, a->flightId, a->signalLevel[0]
           );
 
             rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
@@ -211,8 +211,8 @@ void modesRemoveStaleSQL(struct aircraft *a) {
     if ( !sql_connected ) {
         exit(0);
     } else {
-        sql = sqlite3_mprintf( "UPDATE flights SET EndTime=CURRENT_TIMESTAMP,NumModeSMsgRec='%d' WHERE flightid='%d';",
-                a->messages, a->flightId);
+        sql = sqlite3_mprintf( "UPDATE flight SET endtime=CURRENT_TIMESTAMP,flight='%s',modes='%06X',squawk='%d',msgs='%d' WHERE flightid='%d';",
+                a->flight, a->addr, a->modeA, a->messages, a->flightId);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);

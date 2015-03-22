@@ -27,6 +27,7 @@ CREATE TABLE trackslog (
     heading     INT( 6 ),
     speed       INT( 6 ),
     flightid    INT( 8 ),
+    signallevel INT ( 2 ),
     last_update TIMESTAMP          DEFAULT ( CURRENT_TIMESTAMP ) 
 );
 
@@ -41,3 +42,20 @@ CREATE VIEW planes AS
                 ON ( f.modes = a.modes );
 
 
+CREATE TABLE session (
+  sessionid integer primary key,
+  locationid integer not null,
+  starttime datetime not null,
+  endtime datetime
+);
+
+CREATE TABLE flight (
+  flightid integer primary key,
+  sessionid integer not null,
+  modes       CHAR( 6 ),
+  flight      VARCHAR( 7 ),
+  squawk      INT( 4 ),
+  msgs        INT( 6 ),
+  starttime datetime not null,
+  endtime datetime
+);
