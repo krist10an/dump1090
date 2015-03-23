@@ -14,9 +14,9 @@ DROP VIEW spatial_flights;
 CREATE VIEW spatial_flights AS
        SELECT t.rowid AS rowid, t.modes, t.last_update, f.*, Makeline(t.Geometry) AS Geometry
          FROM spatial_trackslog t
-          JOIN Flights f
-            ON ( t.flightId = f.FlightID )
-            GROUP BY t.flightId;
+          JOIN flight f
+            ON ( t.flightId = f.flightId )
+          GROUP BY t.flightId;
 
 
 /* Spatialite 4.0+ */
