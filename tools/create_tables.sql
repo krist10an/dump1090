@@ -59,3 +59,10 @@ CREATE TABLE flight (
   starttime datetime not null,
   endtime datetime
 );
+
+CREATE TABLE dbversion (
+    version  INTEGER NOT NULL,
+    created  DATETIME NOT NULL
+);
+
+INSERT INTO dbversion (version, created) VALUES (2, CURRENT_TIMESTAMP);
