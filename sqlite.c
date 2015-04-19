@@ -33,6 +33,7 @@ void connectSQL() {
         // Create session
         sql = sqlite3_mprintf("INSERT INTO session (locationid, starttime) VALUES (1, CURRENT_TIMESTAMP)");
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "Unable to add session: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -66,6 +67,7 @@ void disconnectSQL() {
         // Stop session
         sql = sqlite3_mprintf("UPDATE session SET endtime=CURRENT_TIMESTAMP WHERE sessionid='%d'", sql_session_id);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "Error closing session: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -95,6 +97,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
         sql = sqlite3_mprintf( "INSERT INTO flight (sessionid, modes, starttime) VALUES ('%d', '%06X', CURRENT_TIMESTAMP);",
                 sql_session_id, a->addr);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -118,6 +121,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
     if (mm->msgtype == 0) {
         sql = sqlite3_mprintf( "INSERT OR IGNORE INTO flightslog (modes, alt, df, msgs) VALUES ('%06X', '%d', '%d', '%ld'); UPDATE flightslog SET modes='%06X',alt='%d',df='%d',msgs='%ld',last_update=CURRENT_TIMESTAMP WHERE modes='%06X';",mm->addr, mm->altitude, mm->msgtype, a->messages,mm->addr, mm->altitude, mm->msgtype, a->messages,mm->addr);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
              sqlite3_free(zErrMsg);
@@ -133,6 +137,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
     if (mm->msgtype == 4 || mm->msgtype == 20) {
         sql = sqlite3_mprintf( "INSERT INTO flights (modes, alt, df, msgs) VALUES ('%06X', '%d', '%d', '%ld')",mm->addr, a->altitude, mm->msgtype, a->messages);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK ) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
               sqlite3_free(zErrMsg);
@@ -146,6 +151,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
     if (mm->msgtype == 5 || mm->msgtype == 21) {
         sql = sqlite3_mprintf( "INSERT OR IGNORE INTO flightslog (modes, alt, squawk, df, msgs) VALUES ('%06X', '%d', '%d', '%d', '%ld'); UPDATE flightslog SET modes='%06X', alt='%d', squawk='%d', df='%d', msgs='%d', last_update=CURRENT_TIMESTAMP WHERE modes='%06X';",mm->addr, mm->altitude, mm->modeA, mm->msgtype, a->messages,mm->addr, mm->altitude, mm->modeA, mm->msgtype, a->messages);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK ) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -159,6 +165,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
     if (mm->msgtype == 11) {
         sql = sqlite3_mprintf( "INSERT INTO flights (modes, df, msgs) VALUES ('%06X', '%d', '%ld')",mm->addr, mm->msgtype, a->messages);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK ) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -175,6 +182,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
             mm->msgtype, a->flight, a->flight, mm->addr, mm->altitude, mm->vert_rate, a->lat, a->lon, a->speed,a->track, a->messages
             ,mm->msgtype, a->flight, a->flight, mm->addr, mm->altitude, mm->vert_rate, a->lat, a->lon, a->speed, a->track, a->messages);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK ) {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
@@ -189,6 +197,7 @@ void modesFeedSQL(struct modesMessage *mm, struct aircraft *a) {
           );
 
             rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+            sqlite3_free(sql);
             if( rc != SQLITE_OK ) {
                 fprintf(stderr, "SQL error: %s\n", zErrMsg);
                 sqlite3_free(zErrMsg);
@@ -214,6 +223,7 @@ void modesRemoveStaleSQL(struct aircraft *a) {
         sql = sqlite3_mprintf( "UPDATE flight SET endtime=CURRENT_TIMESTAMP,flight='%s',modes='%06X',squawk='%d',msgs='%d' WHERE flightid='%d';",
                 a->flight, a->addr, a->modeA, a->messages, a->flightId);
         rc = sqlite3_exec(db, sql, callback, 0, &zErrMsg);
+        sqlite3_free(sql);
         if( rc != SQLITE_OK )  {
             fprintf(stderr, "SQL error: %s\n", zErrMsg);
             sqlite3_free(zErrMsg);
