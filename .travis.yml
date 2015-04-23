@@ -1,0 +1,14 @@
+language: cpp
+
+compiler: gcc
+
+before_install:
+    - sudo add-apt-repository ppa:pmjdebruijn/rtl-sdr-release -y
+    - sudo apt-get update -qq
+    - sudo apt-get install -qq build-essential libsqlite3-dev libusb-1.0-0-dev sqlite3 librtlsdr-dev
+
+before_script:
+    - make
+
+script:
+    - ./dump1090 --ifile testfiles/modes1.bin --quiet

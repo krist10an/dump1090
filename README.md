@@ -1,3 +1,17 @@
+[![Build Status](https://travis-ci.org/krist10an/dump1090.svg?branch=master)](https://travis-ci.org/krist10an/dump1090)
+
+Dump1090 Sqlite README addendum
+===
+
+Dump1090 with support for storing positions in Sqlite3 database.
+
+To use
+
+* Download basestation.sqb
+* Add database tables by: cat tools/create_tables.sql | sqlite3 basestation.sqb
+* Run dump1090: ./dump1090 -q --sql --net
+
+
 Dump1090 README
 ===
 
