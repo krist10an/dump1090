@@ -12,4 +12,4 @@ before_script:
 
 script:
     - cat tools/create_tables.sql | sqlite3 basestation.sqb
-    - ./dump1090 --ifile testfiles/modes1.bin --sql
+    - ./dump1090 --ifile testfiles/modes1.bin --sql --quiet
